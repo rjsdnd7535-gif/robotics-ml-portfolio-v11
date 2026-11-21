@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>로봇·머신러닝 포트폴리오</title>
+<style>
+:root{color-scheme:light;--paper:#fbfaf6;--ink:#212722;--muted:#525f54;--line:#d9ded5;--accent:#205a45}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.65 "Malgun Gothic",system-ui,sans-serif}main{max-width:1080px;margin:auto;padding:clamp(18px,5vw,65px)}header{border-bottom:2px solid var(--ink);padding-bottom:22px}h1{font-size:clamp(34px,5vw,58px);line-height:1.12;margin:0 0 9px;letter-spacing:-.04em}header p,.meta,.empty{color:var(--muted)}.controls{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-top:25px}label{display:grid;gap:4px;font-weight:700}input,select,button{font:inherit;padding:8px 11px;border:1px solid var(--line);border-radius:5px;background:white;color:inherit;min-width:0}button{cursor:pointer;color:var(--accent);font-weight:700}button:disabled{opacity:.5;cursor:default}.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:15px 0;border-bottom:1px solid var(--line)}.toolbar output{margin-right:auto}.entry{border-bottom:1px solid var(--line);padding:16px 0}.entry h3{margin:0;font-size:1.18rem}.entry p{margin:3px 0}h2{margin:28px 0 4px;color:var(--accent)}ul{padding-left:1.4em}.tags{display:flex;gap:8px;flex-wrap:wrap}.tag{border:1px solid var(--line);border-radius:20px;padding:2px 9px;font-size:.84em}.pick{display:flex;align-items:center;gap:7px;float:right;font-size:.88em;margin-left:10px}.pick input{accent-color:var(--accent)}:focus-visible{outline:2px solid var(--accent);outline-offset:3px}@media(max-width:660px){.controls{grid-template-columns:1fr 1fr}.controls label:first-child{grid-column:1/-1}}
+
+[hidden]{display:none!important}body{background:#edf0ef}.resume-nav{max-width:940px;margin:20px auto;display:flex;gap:8px;align-items:center;padding:0 18px}.resume-nav button[aria-pressed=true]{background:#164c41;color:white}.resume-nav button:last-child{margin-left:auto}
+#sheet{background:white;max-width:900px;padding:clamp(24px,6vw,70px);box-shadow:0 4px 26px #243e3210;margin:0 auto 48px}#sheet header{border-color:#234d43}#sheet h1{font-size:2.65rem}#sheet header p{margin:5px 0;color:#294b40}#sheet .contact{white-space:pre-line;color:#53625c}#sheet section{display:grid;grid-template-columns:115px 1fr;gap:20px;border-bottom:1px solid #d9dedb;padding:20px 0}#sheet h2{font-size:1rem;margin:1px 0}#sheet h3{font-size:1.03rem;margin:0}#sheet article+article{margin-top:16px}#sheet ul{margin:4px 0;padding-left:1.15em}#sheet .meta{font-size:.86rem;margin:2px 0}#sheet button{font-size:.8rem;padding:3px 9px}#sheet .edit{float:right;margin-left:8px}#sheet .empty{font-size:.9rem;margin:0 0 6px}#sheet .intro{white-space:pre-line;margin-top:14px}dialog label{margin:8px 0}dialog textarea{font:inherit;padding:8px}dialog{max-height:88vh;overflow:auto}dialog::backdrop{background:#10271e60}
+@media(max-width:600px){#sheet section{grid-template-columns:1fr;gap:7px}.resume-nav{margin:12px auto}.resume-nav button{font-size:.85rem}}
+@page{size:A4;margin:14mm}@media print{body,#sheet{background:white}#sheet{box-shadow:none;padding:0;margin:0;max-width:none;font-size:10pt}#sheet section{grid-template-columns:24mm 1fr;gap:4mm;padding:3mm 0}#sheet article{break-inside:avoid}#sheet h1{font-size:25pt}#sheet section.blank,.resume-nav,#archive,dialog,#sheet button{display:none!important}}
+.project-photo{margin:12px 0 18px}.project-photo img{display:block;max-width:100%;width:auto;max-height:250px;border:1px solid #d9dedb}.project-photo figcaption{margin-top:5px;font-size:.85rem;color:#475e54}@media print{#sheet .project-photo{display:none}}</style></head><body>
+<nav class="resume-nav" aria-label="화면 선택"><button id="resume-tab" aria-pressed="true">이력서</button><button id="archive-tab" aria-pressed="false">경험 기록</button><button id="print-resume">인쇄 · PDF 저장</button></nav>
+<main id="sheet"></main>
+<dialog id="contact-dialog"><form id="contact-form"><h2>기본 정보 수정</h2><label>이름<input id="cv-name" required></label><label>지원 직무<input id="cv-target" required></label><label>이메일<input id="cv-email" type="email"></label><label>전화번호<input id="cv-phone" type="tel"></label><label>포트폴리오 주소<input id="cv-url" type="url"></label><label>자기소개<textarea id="cv-intro" rows="3"></textarea></label><button>저장</button> <button type="button" id="contact-cancel">취소</button><output id="cv-msg"></output></form></dialog>
+<main id="archive" hidden>
+<header><h1 id="name"></h1><p id="target"></p><p id="profile-intro"></p><details style="color:var(--ink);background:var(--paper);padding:10px;margin-top:14px">
+<summary style="cursor:pointer">내 정보 수정</summary>
+<form id="profile-form">
+<label for="profile-name">이름</label><input id="profile-name" required maxlength="80">
+<label for="profile-target">목표 직무</label><input id="profile-target" required maxlength="150">
+<button type="submit">저장</button>
+<button type="button" id="profile-reset">기본값 복원</button>
+<p style="color:var(--muted)" id="profile-status" role="status">이 브라우저에 저장됩니다.</p>
+</form></details></header>
+<div class="controls"><label>검색<input id="search" type="search" placeholder="프로젝트·기술·성과 검색"></label><label>분류<select id="category"><option value="">전체</option></select></label><label>기술<select id="tag"><option value="">전체</option></select></label></div>
+<div class="toolbar"><button type="button" id="new-record">항목 추가</button>
+<dialog id="record-dialog" style="width:min(540px,90vw);border:1px solid var(--line);border-radius:10px">
+<form id="record-form"><h2 id="editor-title">항목 수정</h2>
+<label>분류<select id="edit-category"></select></label>
+<label>제목<input id="edit-title" required></label><label>상태·참여 방식<input id="edit-status"></label><label>기간 또는 일자<input id="edit-period" placeholder="예: 2025.03 – 2025.06"></label><label><span><input id="edit-include" type="checkbox"> 이력서에 포함</span></label>
+<label>기술·태그 (쉼표로 구분)<input id="edit-tags"></label>
+<label>내용 (한 줄에 한 항목)<textarea id="edit-bullets" rows="6"></textarea></label>
+<label>근거 자료 설명 (한 줄에 한 항목)<textarea id="edit-evidence" rows="3"></textarea></label>
+<p>수정 내용은 현재 브라우저에 저장됩니다.</p><output id="edit-msg"></output>
+<button type="submit">저장</button> <button type="button" id="cancel-edit">취소</button></form></dialog><output id="count" aria-live="polite"></output><button id="clear" type="button">선택 해제</button><button id="json" type="button">JSON 저장</button><button id="md" type="button">Markdown 저장</button></div>
+<div id="results"></div>
+</main><script id="portfolio-data" type="application/json">__PORTFOLIO_DATA__</script>
+<script>
+const db = JSON.parse(document.getElementById("portfolio-data").textContent);
+const byId = id => document.getElementById(id);
+const selected = new Set();
+const recordKey = "submission-local-records-v1";
+let changes = {};
+try { changes = JSON.parse(localStorage.getItem(recordKey) || "{}") || {}; } catch {}
+const excludedRecordIds = new Set(["delivery-planning", "robot-arm", "attention-study", "autocar-planning"]);
+for (const row of Object.values(changes)) {
+  if (excludedRecordIds.has(row?.id)) continue;
+  if (!row || !db.categories[row.category] || !Array.isArray(row.tags) || !Array.isArray(row.bullets)) continue;
+  if (row.id === "education-physical-ai" && row.category === "education" && !localStorage.getItem("submission-category-v2")) row.category = "training";
+  const index = db.records.findIndex(item => item.id === row.id);
+  if (index < 0) db.records.push(row); else db.records[index] = row;
+}
+try {
+  if (Object.keys(changes).length) localStorage.setItem(recordKey, JSON.stringify(changes));
+  localStorage.setItem("submission-category-v2","1");
+} catch {}
+const searchIndex = new Map();
+function refreshIndex() {
+  searchIndex.clear();
+  for (const row of db.records) searchIndex.set(row.id,
+    [row.title,row.status,db.categories[row.category],...row.tags,...row.bullets,...(row.evidence||[])].join(" ").normalize("NFKC").toLowerCase());
+  const select = byId("tag"), previous = select.value;
+  select.replaceChildren(new Option("전체",""));
+  for (const tag of [...new Set(db.records.flatMap(row=>row.tags))].sort((a,b)=>a.localeCompare(b,"ko")))
+    select.add(new Option(tag,tag));
+  select.value = previous;
+  if (select.selectedIndex < 0) select.selectedIndex = 0;
+}
+const textNode = (tag, text, cls) => {
+  const node = document.createElement(tag);
+  node.textContent = text;
+  if (cls) node.className = cls;
+  return node;
+};
+byId("name").textContent = db.profile.name + " | " + db.profile.portfolioTitle;
+byId("target").textContent = db.profile.target;
+for (const [key, label] of Object.entries(db.categories)) byId("category").add(new Option(label, key));
+refreshIndex();
+function matching() {
+  const terms = byId("search").value.normalize("NFKC").toLowerCase().trim().split(/\s+/).filter(Boolean);
+  const category = byId("category").value;
+  const tag = byId("tag").value;
+  return db.records.filter(row => (!category || row.category === category) &&
+    (!tag || row.tags.includes(tag)) && terms.every(term => searchIndex.get(row.id).includes(term)));
+}
+function syncCount() {
+  const visible = matching().length;
+  byId("count").textContent = "조회 " + visible + "건 · 선택 " + selected.size + "건";
+  byId("clear").disabled = !selected.size;
+  byId("json").disabled = byId("md").disabled = !selected.size && !visible;
+}
+function appendPhoto(parent,id) {
+  const photo = db.photos?.[id];
+  if (!photo) return;
+  const figure = document.createElement("figure");
+  figure.className = "project-photo";
+  const link = document.createElement("a");
+  link.href = photo.url;
+  const image = document.createElement("img");
+  image.src = photo.url;
+  image.alt = photo.caption;
+  image.loading = "lazy";
+  link.append(image);
+  figure.append(link,textNode("figcaption",photo.caption));
+  parent.append(figure);
+}
+function render() {
+  const results = byId("results");
+  results.replaceChildren();
+  const matched = matching();
+  const category = byId("category").value;
+  const filtered = category || byId("tag").value || byId("search").value.trim();
+  for (const [key, label] of Object.entries(db.categories)) {
+    if (category && category !== key) continue;
+    const rows = matched.filter(row => row.category === key);
+    if (filtered && !rows.length && !(category && !byId("tag").value && !byId("search").value.trim())) continue;
+    const section = document.createElement("section");
+    section.append(textNode("h2", label));
+    const add = textNode("button", label + " 추가");
+    add.type = "button";
+    add.onclick = () => {openEditor(); byId("edit-category").value = key;};
+    section.append(add);
+    if (!rows.length) section.append(textNode("p", "등록된 기록 없음", "empty"));
+    for (const row of rows) {
+      const article = document.createElement("article");
+      article.className = "entry";
+      article.id = row.id;
+      const label = textNode("label", "선택", "pick");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = selected.has(row.id);
+      checkbox.setAttribute("aria-label", row.title + " 선택");
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked) selected.add(row.id); else selected.delete(row.id);
+        syncCount();
+      });
+      label.prepend(checkbox);
+      const points = document.createElement("ul");
+      for (const line of row.bullets) points.append(textNode("li", line));
+      const tags = document.createElement("div");
+      tags.className = "tags";
+      for (const tag of row.tags) {
+        const button = textNode("button", tag, "tag");
+        button.type = "button";
+        button.addEventListener("click", () => { byId("tag").value = tag; render(); byId("tag").focus(); });
+        tags.append(button);
+      }
+      article.append(label, textNode("h3", row.title), textNode("p", row.status, "meta"), points, tags);
+      const edit = textNode("button","항목 수정");
+      edit.type = "button";
+      edit.onclick = () => openEditor(row);
+      article.append(edit);
+      if (row.evidence?.length) article.append(textNode("p",row.evidence.join(" · "),"meta"));
+      appendPhoto(article,row.id);
+      section.append(article);
+    }
+    results.append(section);
+  }
+  if (!results.children.length) results.append(textNode("p","검색 결과 없음","empty"));
+  syncCount();
+}
+function download(format) {
+  const rows = selected.size ? db.records.filter(row => selected.has(row.id)) : matching();
+  const content = format === "json" ? JSON.stringify(rows, null, 2) :
+    rows.map(row => "## " + row.title + "\n\n" + row.bullets.map(point => "- " + point).join("\n")).join("\n\n");
+  const url = URL.createObjectURL(new Blob([content], {type: "text/plain;charset=utf-8"}));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "resume-selection." + format;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+for (const id of ["search","category","tag"]) byId(id).addEventListener("input", render);
+byId("clear").addEventListener("click", () => { selected.clear(); render(); });
+byId("json").addEventListener("click", () => download("json"));
+byId("md").addEventListener("click", () => download("md"));
+const profileKey = "submission-portfolio-local-profile-v1";
+function loadProfile() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(profileKey));
+    if (saved && typeof saved.name === "string" && typeof saved.target === "string") return {...db.profile, ...saved};
+  } catch {}
+  return db.profile;
+}
+function showProfile(profile) {
+  byId("name").textContent = profile.name + " | " + db.profile.portfolioTitle;
+  byId("target").textContent = profile.target;
+  byId("profile-intro").textContent = profile.intro || "";
+  byId("profile-name").value = profile.name;
+  byId("profile-target").value = profile.target;
+}
+showProfile(loadProfile());
+byId("profile-form").addEventListener("submit", event => {
+  event.preventDefault();
+  const profile = {...loadProfile(),name: byId("profile-name").value.trim(), target: byId("profile-target").value.trim()};
+  if (!profile.name || !profile.target) {
+    byId("profile-status").textContent = "이름과 목표 직무를 입력해 주세요.";
+    return;
+  }
+  try {
+    localStorage.setItem(profileKey, JSON.stringify(profile));
+    showProfile(profile);
+    byId("profile-status").textContent = "저장 완료";
+  } catch {
+    showProfile(profile);
+    byId("profile-status").textContent = "브라우저 저장이 제한돼 현재 화면에만 적용했습니다.";
+  }
+});
+byId("profile-reset").addEventListener("click", () => {
+  try { localStorage.removeItem(profileKey); } catch {}
+  showProfile(db.profile);
+  byId("profile-status").textContent = "기본값 복원";
+});
+let editingId;
+for (const [key,label] of Object.entries(db.categories)) byId("edit-category").add(new Option(label,key));
+function openEditor(row) {
+  editingId=row?.id; byId("edit-period").value=row?.period || ""; byId("edit-include").checked=row ? included(row) : true;
+  byId("editor-title").textContent=row?"항목 수정":"항목 추가";
+  byId("edit-category").value=row?.category || byId("category").value || "projects";
+  byId("edit-title").value=row?.title || "";
+  byId("edit-status").value=row?.status || "";
+  byId("edit-tags").value=(row?.tags || []).join(", ");
+  byId("edit-bullets").value=(row?.bullets || []).join("\n");
+  byId("edit-evidence").value=(row?.evidence || []).join("\n");
+  byId("edit-msg").textContent="";
+  byId("record-dialog").showModal();
+}
+byId("new-record").onclick=()=>openEditor();
+byId("cancel-edit").onclick=()=>byId("record-dialog").close();
+byId("record-form").onsubmit=event=>{
+  event.preventDefault();
+  const index=db.records.findIndex(row=>row.id===editingId);
+  const title=byId("edit-title").value.trim();
+  if (!title) {byId("edit-msg").textContent="제목을 입력해 주세요.";return;}
+  const parts=(field,separator)=>byId(field).value.split(separator).map(v=>v.trim()).filter(Boolean);
+  const row={...db.records[index],id:editingId || crypto.randomUUID(),category:byId("edit-category").value,title,
+    period:byId("edit-period").value.trim(),include:byId("edit-include").checked,status:byId("edit-status").value.trim(),tags:[...new Set(parts("edit-tags",","))],
+    bullets:parts("edit-bullets","\n"),evidence:parts("edit-evidence","\n")};
+  const next={...changes,[row.id]:row};
+  try {localStorage.setItem(recordKey,JSON.stringify(next));} catch {byId("edit-msg").textContent="저장 공간을 확인해 주세요.";return;}
+  changes=next;
+  if(index<0) db.records.push(row); else db.records[index]=row;
+  byId("search").value="";
+  byId("category").value=row.category;
+  byId("tag").value="";
+  refreshIndex(); render(); byId("record-dialog").close();
+  byId(row.id)?.scrollIntoView({block:"center"});
+};
+render();
+</script><script>
+const featured=["hospital-delivery","ocean-route","library-ocr"];
+function included(row){return row.include ?? (row.category!=="projects" || featured.includes(row.id))}
+const hints={education:"학교·학과 및 재학 기간",grades:"평점 / 만점 및 기준 학기",military:"복무 구분·군별 및 복무 기간",training:"교육 과정·기관 및 이수 기간",awards:"수상명·주관 기관 및 수상일",projects:"프로젝트명·참여 방식 및 주요 결과",research:"연구 주제 및 학습 내용"};
+function action(label,handler,cls){const b=textNode("button",label,cls);b.type="button";b.onclick=handler;return b}
+function drawResume(){
+ const sheet=byId("sheet"),profile=loadProfile();
+ const header=document.createElement("header");
+ header.append(action("기본 정보 수정",editContact,"edit"),textNode("h1",profile.name),textNode("p",profile.target));
+ const contact=[profile.email,profile.phone,profile.url].filter(Boolean);
+ if(contact.length)header.append(textNode("p",contact.join("  ·  "),"contact"));
+ if(profile.intro)header.append(textNode("p",profile.intro,"intro"));
+ sheet.replaceChildren(header);
+ for(const key of ["education","grades","projects","training","research","awards","military"]){
+  const section=document.createElement("section"), body=document.createElement("div");
+  const rows=db.records.filter(r=>r.category===key && included(r));
+  if(key==="projects")rows.sort((a,b)=>(featured.indexOf(a.id)+4)%4-(featured.indexOf(b.id)+4)%4);
+  section.append(textNode("h2",db.categories[key]),body);
+  if(!rows.length){section.className="blank";body.append(textNode("p",hints[key],"empty"))}
+  for(const row of rows){
+   const item=document.createElement("article");
+   item.append(action("수정",()=>openEditor(row),"edit"),textNode("h3",row.title));
+   const meta=[row.period,row.status==="확인 필요"?"":row.status,key==="projects"?row.tags.join(" · "):""].filter(Boolean);
+   if(meta.length)item.append(textNode("p",meta.join("  |  "),"meta"));
+   const points=row.bullets.filter(v=>!["인공지능학과 전공","재학 상태 및 졸업 예정일 확인","개인 기여 범위 확인"].includes(v));
+   if(points.length){const list=document.createElement("ul");points.forEach(v=>list.append(textNode("li",v)));item.append(list)}
+   appendPhoto(item,row.id);
+   body.append(item);
+  }
+  body.append(action(db.categories[key]+" 추가",()=>{openEditor();byId("edit-category").value=key;byId("edit-title").placeholder=hints[key]}));
+  sheet.append(section);
+ }
+}
+const contactFields=["name","target","email","phone","url","intro"];
+function editContact(){const p=loadProfile();for(const k of contactFields)byId("cv-"+k).value=p[k]||"";byId("cv-msg").textContent="";byId("contact-dialog").showModal()}
+byId("contact-cancel").onclick=()=>byId("contact-dialog").close();
+byId("contact-form").onsubmit=e=>{e.preventDefault();const p={...loadProfile()};for(const k of contactFields)p[k]=byId("cv-"+k).value.trim();if(!p.name||!p.target){byId("cv-msg").textContent="이름과 지원 직무를 입력해 주세요.";return}try{localStorage.setItem(profileKey,JSON.stringify(p))}catch{byId("cv-msg").textContent="브라우저 저장 공간을 확인해 주세요.";return}showProfile(p);drawResume();byId("contact-dialog").close()};
+document.body.append(byId("record-dialog"));
+byId("record-dialog").addEventListener("close",drawResume);
+function viewResume(on){byId("archive").hidden=on;byId("sheet").hidden=!on;byId("resume-tab").setAttribute("aria-pressed",on);byId("archive-tab").setAttribute("aria-pressed",!on);if(on)drawResume();window.scrollTo(0,0)}
+byId("resume-tab").onclick=()=>viewResume(true);byId("archive-tab").onclick=()=>viewResume(false);
+byId("print-resume").onclick=()=>{viewResume(true);window.print()};
+drawResume();
+</script></body></html>
